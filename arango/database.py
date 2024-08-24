@@ -1223,14 +1223,20 @@ class Database(ApiGroup):
 
         return self._execute(request, response_handler)
 
-    def databases_accessible_to_user(self) -> Result[List[str]]:
+    def databases_accessible_to_user(
+        self, username: str | None = None
+    ) -> Result[List[str]]:
         """Return the names of all databases accessible by the user.
 
-        :return: Database names accesible by the current user.
+        :return: Database names accessible by the current user.
         :rtype: List[str]
         :raise arango.exceptions.DatabaseListError: If retrieval fails.
         """
-        request = Request(method="get", endpoint="/_api/database/user")
+
+        if username is not None:
+            request = Request(method="get", endpoint=f"/_api/user/{username}/database")
+        else:
+            request = Request(method="get", endpoint="/_api/database/user")
 
         def response_handler(resp: Response) -> List[str]:
             if not resp.is_success:
